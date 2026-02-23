@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use JsonSerializable;
 use ReflectionClass;
+use Workflow\Events\StateChanged;
 use Workflow\Exceptions\TransitionNotFound;
 
 abstract class State implements Castable, JsonSerializable
@@ -146,6 +147,13 @@ abstract class State implements Castable, JsonSerializable
         if ($currentState instanceof self) {
             $currentState->setField($this->field);
         }
+
+        event(new StateChanged(
+            $this,
+            $this->model->{$this->field},
+            $this->model,
+            $this->field,
+        ));
 
         return $this->model;
     }
